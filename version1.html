@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A beginner-friendly interactive guide to forward chaining and backward chaining in rule-based AI.">
+<title>Reasoning Lab | Forward & Backward Chaining</title>
+<style>
+:root{--ink:#17233b;--muted:#5c6880;--bg:#f4f7fc;--card:#fff;--blue:#315ee8;--teal:#087f75;--line:#dce4f1;--gold:#fff3d6}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:linear-gradient(120deg,#14264c,#315ee8);color:#fff;padding:54px 20px 44px}
+.wrap{max-width:1100px;margin:auto;padding:0 20px}.eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:.75rem;font-weight:800;opacity:.8}
+h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.1;margin:.5rem 0 1rem}header p{max-width:720px;color:#e4eaff;font-size:1.1rem}
+nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}nav a{color:#fff;text-decoration:none;border:1px solid #ffffff66;border-radius:30px;padding:7px 13px;font-size:.9rem}
+main{padding:30px 0 70px}.section{margin:28px 0}.section h2{font-size:1.8rem;margin-bottom:8px}.lead{color:var(--muted);max-width:820px;margin-top:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 8px 28px #23385b0a}
+.card h3{margin-top:0}.tag{display:inline-block;background:#eaf0ff;color:#2348b7;padding:3px 10px;border-radius:30px;font-size:.78rem;font-weight:750}
+.callout{background:var(--gold);border-left:4px solid #e4a52b;padding:14px 18px;border-radius:8px}
+.flow{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:14px 0}.step{background:#edf2ff;border:1px solid #cdd9ff;padding:10px 13px;border-radius:12px;font-weight:650}.arrow{color:var(--blue);font-weight:900}
+code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-space:pre-wrap;background:#101b31;color:#e4edff;padding:18px;border-radius:12px;overflow:auto}
+button{background:var(--blue);color:white;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer}button.secondary{background:#eaf0ff;color:#2348b7}button:hover{filter:brightness(.95)}
+label{display:inline-flex;align-items:center;gap:8px;margin:7px 15px 7px 0}input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue)}
+select{padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font:inherit}
+.output{background:#101b31;color:#e4edff;border-radius:12px;padding:16px;min-height:100px;margin-top:14px}
+.output .ok{color:#7fe0bd}.output .no{color:#ffbdad}.rule{border:1px solid var(--line);border-radius:10px;padding:12px;margin:9px 0;background:#fbfcff}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line)}th{background:#eaf0ff}
+.quiz-q{padding:14px 0;border-bottom:1px solid var(--line)}.small{font-size:.9rem;color:var(--muted)}
+footer{background:#14264c;color:#dce6ff;padding:25px 0}footer a{color:#fff}
+@media(max-width:600px){header{padding-top:38px}.card{padding:17px}nav{gap:7px}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<div class="eyebrow">Beginner's interactive AI guide</div>
+<h1>Reasoning Lab</h1>
+<p>Learn how an AI system can reason with facts and rules. Explore <strong>forward chaining</strong> (facts → conclusion) and <strong>backward chaining</strong> (goal → evidence) with simple examples you can run yourself.</p>
+<nav><a href="#basics">Start here</a><a href="#forward">Forward chaining</a><a href="#backward">Backward chaining</a><a href="#compare">Compare</a><a href="#quiz">Quick quiz</a></nav>
+</div></header>
+<main class="wrap">
+<section id="basics" class="section">
+<h2>1. First, understand the idea</h2><p class="lead">A rule-based expert system stores information as facts and uses IF–THEN rules to derive new information. The reasoning engine repeatedly checks whether the conditions of a rule are satisfied.</p>
+<div class="grid">
+<div class="card"><span class="tag">FACT</span><h3>Something currently known</h3><p>Example: <code>fever</code> is true. Facts are the starting information supplied by a user, sensor, or database.</p></div>
+<div class="card"><span class="tag">RULE</span><h3>A condition and an action</h3><p>Example: <code>IF fever AND cough THEN flu_suspected</code>. When all conditions are true, the rule can fire.</p></div>
+<div class="card"><span class="tag">INFERENCE</span><h3>Deriving new knowledge</h3><p>The system applies rules to known facts and adds conclusions. A conclusion may help trigger another rule.</p></div>
+</div>
+<div class="callout"><strong>Remember:</strong> chaining is a way of deciding which rules to apply and in what direction. It does not magically prove facts; it reasons only from the facts and rules provided.</div>
+</section>
+<section id="forward" class="section">
+<h2>2. Forward chaining: facts to conclusion</h2><p class="lead">Forward chaining is <strong>data-driven</strong>. Start with available facts, look for rules whose conditions match, fire those rules, add their conclusions, and repeat until the goal is found or no more rules can fire.</p>
+<div class="flow"><div class="step">Initial facts</div><span class="arrow">→</span><div class="step">Match rules</div><span class="arrow">→</span><div class="step">Add conclusions</div><span class="arrow">→</span><div class="step">Repeat</div></div>
+<div class="card">
+<h3>Try it: choose the facts known at the beginning</h3>
+<p class="small">Example knowledge base: a simplified, fictional support system. These are teaching examples, not medical advice.</p>
+<div id="forwardFacts">
+<label><input type="checkbox" value="fever" checked> fever</label>
+<label><input type="checkbox" value="cough" checked> cough</label>
+<label><input type="checkbox" value="positive_test"> positive_test</label>
+</div>
+<button onclick="runForward()">Run forward chaining</button>
+<div id="forwardOut" class="output" aria-live="polite">Select the starting facts and press “Run forward chaining”.</div>
+</div>
+<div class="card" style="margin-top:16px"><h3>Forward chaining pseudocode</h3><pre>known = initial_facts
+repeat:
+    changed = false
+    for each rule:
+        if every condition is in known:
+            if conclusion is not in known:
+                add conclusion to known
+                changed = true
+until changed is false
+return known</pre></div>
+</section>
+<section id="backward" class="section">
+<h2>3. Backward chaining: goal to evidence</h2><p class="lead">Backward chaining is <strong>goal-driven</strong>. Begin with a question (goal). Find a rule that could produce that goal. Then check whether each condition of that rule is already known; if not, make each condition a smaller sub-goal and try to prove it.</p>
+<div class="flow"><div class="step">Choose a goal</div><span class="arrow">→</span><div class="step">Find a rule for it</div><span class="arrow">→</span><div class="step">Prove its conditions</div><span class="arrow">→</span><div class="step">Goal succeeds / fails</div></div>
+<div class="card">
+<h3>Try it: can the system prove this goal?</h3>
+<div id="backFacts">
+<label><input type="checkbox" value="fever" checked> fever</label>
+<label><input type="checkbox" value="cough" checked> cough</label>
+<label><input type="checkbox" value="positive_test"> positive_test</label>
+</div>
+<p><label for="goal"><strong>Goal to prove:</strong></label>
+<select id="goal"><option value="flu_suspected">flu_suspected</option><option value="recommend_rest">recommend_rest</option><option value="infection_confirmed">infection_confirmed</option><option value="isolate">isolate</option></select></p>
+<button onclick="runBackward()">Prove goal</button>
+<div id="backOut" class="output" aria-live="polite">Choose a goal and press “Prove goal”.</div>
+</div>
+<div class="card" style="margin-top:16px"><h3>Backward chaining pseudocode</h3><pre>prove(goal):
+    if goal is an initial fact:
+        return true
+    for each rule whose conclusion is goal:
+        if every condition can be proved:
+            return true
+    return false</pre><p class="small">A practical implementation also tracks visited goals to avoid infinite loops and may remember previously proved results.</p></div>
+</section>
+<section id="compare" class="section">
+<h2>4. Main differences</h2>
+<table><thead><tr><th>Feature</th><th>Forward chaining</th><th>Backward chaining</th></tr></thead><tbody>
+<tr><td>Direction</td><td>Facts → conclusions</td><td>Goal → supporting facts</td></tr>
+<tr><td>Approach</td><td>Data-driven</td><td>Goal-driven</td></tr>
+<tr><td>Best question</td><td>“What can I conclude from what I know?”</td><td>“Can I prove this particular goal?”</td></tr>
+<tr><td>Work pattern</td><td>May explore many consequences</td><td>Focuses on rules relevant to the goal</td></tr>
+<tr><td>Typical use</td><td>Monitoring, event/rule processing, deriving all consequences</td><td>Diagnosis, query answering, logic programming</td></tr>
+</tbody></table>
+<div class="callout" style="margin-top:16px"><strong>Easy memory trick:</strong> FORWARD moves from what you HAVE to what follows. BACKWARD starts with what you WANT to know and asks what must be true.</div>
+</section>
+<section class="section">
+<h2>5. The example knowledge base</h2>
+<div class="rule"><strong>R1</strong> IF fever AND cough THEN flu_suspected</div>
+<div class="rule"><strong>R2</strong> IF flu_suspected THEN recommend_rest</div>
+<div class="rule"><strong>R3</strong> IF positive_test AND fever THEN infection_confirmed</div>
+<div class="rule"><strong>R4</strong> IF infection_confirmed THEN isolate</div>
+<p class="small">The rule set is deliberately small so the reasoning steps are visible. Real expert systems require carefully validated knowledge, uncertainty handling, and domain safeguards.</p>
+</section>
+<section id="quiz" class="section">
+<h2>6. Check your understanding</h2>
+<div class="card">
+<div class="quiz-q"><strong>1. Which method begins with known facts?</strong><br><label><input type="radio" name="q1" value="a"> Backward chaining</label><label><input type="radio" name="q1" value="b"> Forward chaining</label></div>
+<div class="quiz-q"><strong>2. Which method starts with a goal and searches for rules that support it?</strong><br><label><input type="radio" name="q2" value="a"> Backward chaining</label><label><input type="radio" name="q2" value="b"> Forward chaining</label></div>
+<div class="quiz-q"><strong>3. In an IF–THEN rule, what happens when all IF conditions are true?</strong><br><label><input type="radio" name="q3" value="a"> The THEN conclusion can be inferred</label><label><input type="radio" name="q3" value="b"> All facts are deleted</label></div>
+<button onclick="gradeQuiz()">Check answers</button><p id="quizResult" aria-live="polite"></p>
+</div>
+</section>
+<section class="section">
+<h2>7. Summary</h2><p>Both methods use the same basic ingredients—facts, rules, and an inference engine—but they search in different directions. Use forward chaining when you want to discover what follows from available data. Use backward chaining when you have a specific question and want to find the evidence needed to answer it.</p>
+<p class="small">Educational project: AI Foundations · Rule-based reasoning</p>
+</section>
+</main>
+<footer><div class="wrap">Reasoning Lab · A beginner-friendly learning resource for Forward and Backward Chaining.</div></footer>
+<script>
+const rules=[
+ {id:"R1",if:["fever","cough"],then:"flu_suspected"},
+ {id:"R2",if:["flu_suspected"],then:"recommend_rest"},
+ {id:"R3",if:["positive_test","fever"],then:"infection_confirmed"},
+ {id:"R4",if:["infection_confirmed"],then:"isolate"}
+];
+function selectedFacts(id){return [...document.querySelectorAll(`#${id} input:checked`)].map(x=>x.value)}
+function runForward(){
+ let known=new Set(selectedFacts("forwardFacts")), lines=[`Starting facts: ${[...known].join(", ")||"(none)"}`], fired=new Set(), changed=true;
+ while(changed){changed=false; for(const r of rules){if(!fired.has(r.id)&&r.if.every(x=>known.has(x))){fired.add(r.id);lines.push(`${r.id} fires: ${r.if.join(" AND ")} ⇒ ${r.then}`);if(!known.has(r.then)){known.add(r.then);changed=true}}}}
+ lines.push(`Final known facts: ${[...known].join(", ")||"(none)"}`);
+ if(!fired.size)lines.push("No rule could fire with these starting facts.");
+ document.getElementById("forwardOut").innerHTML=lines.map(x=>`<div>${escapeHtml(x)}</div>`).join("");
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function runBackward(){
+ const facts=new Set(selectedFacts("backFacts")), goal=document.getElementById("goal").value, visiting=new Set(), lines=[];
+ function prove(g){
+  lines.push(`Check goal: ${g}`);
+  if(facts.has(g)){lines.push(`✓ ${g} is an initial fact.`);return true}
+  if(visiting.has(g)){lines.push(`Cycle detected while checking ${g}; stop this path.`);return false}
+  visiting.add(g);
+  const candidates=rules.filter(r=>r.then===g);
+  if(!candidates.length){lines.push(`✗ No fact or rule can establish ${g}.`);visiting.delete(g);return false}
+  for(const r of candidates){
+   lines.push(`Try ${r.id}: ${r.if.join(" AND ")} ⇒ ${g}`);
+   let all=true;for(const c of r.if){if(!prove(c)){all=false;break}}
+   if(all){lines.push(`✓ ${r.id} succeeds; therefore ${g} is proved.`);visiting.delete(g);return true}
+   lines.push(`✗ ${r.id} cannot prove ${g} with the available facts.`);
+  }
+  visiting.delete(g);return false;
+ }
+ const result=prove(goal);lines.push(result?`RESULT: Goal "${goal}" is PROVED.`:`RESULT: Goal "${goal}" CANNOT be proved from the selected facts and rules.`);
+ document.getElementById("backOut").innerHTML=lines.map(x=>`<div>${escapeHtml(x)}</div>`).join("");
+}
+function gradeQuiz(){
+ const answers={q1:"b",q2:"a",q3:"a"};let score=0;
+ for(const [q,a] of Object.entries(answers)){if(document.querySelector(`input[name="${q}"]:checked`)?.value===a)score++}
+ document.getElementById("quizResult").textContent=`You scored ${score}/3. ${score===3?"Excellent work!":"Review the explanations above and try again."}`;
+}
+</script>
+</body></html>
